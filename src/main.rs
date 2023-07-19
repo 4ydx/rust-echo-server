@@ -1,4 +1,3 @@
-// use base64::{engine::general_purpose, Engine as _};
 use clap::Parser;
 use tokio::io;
 use tokio::io::AsyncReadExt;
@@ -170,7 +169,7 @@ mod tests {
         let rl = proxy.read(read_buffer).await.unwrap();
         let message_out = str::from_utf8(&read_buffer[0..rl]).unwrap();
 
-        let expect = "HTTP/1.1 200 OK\r\nContent-Type: application/vnd.api+json\r\nContent-Length: 26\r\n\r\nGET TEST\r\nOther: other\r\n\r\n";
+        let expect = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 26\r\n\r\nGET TEST\r\nOther: other\r\n\r\n";
         assert_eq!(expect, message_out);
 
         // basic POST request
@@ -186,7 +185,7 @@ mod tests {
         let rl = proxy.read(read_buffer).await.unwrap();
         let message_out = str::from_utf8(&read_buffer[0..rl]).unwrap();
 
-        let expect = "HTTP/1.1 200 OK\r\nContent-Type: application/vnd.api+json\r\nContent-Length: 36\r\n\r\nPOST TEST\r\nContent-Length: 4\r\n\r\nBODY";
+        let expect = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 36\r\n\r\nPOST TEST\r\nContent-Length: 4\r\n\r\nBODY";
         assert_eq!(expect, message_out);
     }
 }
