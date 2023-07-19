@@ -54,7 +54,7 @@ async fn serve(socket_address: &str) -> io::Result<()> {
             let (mut rd_external_client, mut wr_external_client) = external_client.split();
 
             'outer: loop {
-                let mut rd_external_client_buffer = vec![0; 5];
+                let mut rd_external_client_buffer = vec![0; 512];
                 let n = match rd_external_client
                     .read(&mut rd_external_client_buffer)
                     .await
