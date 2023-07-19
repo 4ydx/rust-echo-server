@@ -72,9 +72,9 @@ async fn serve(socket_address: &str) -> io::Result<()> {
                     Err(e) => panic!("Invalid UTF-8 sequence: {}", e),
                 };
 
-                if header_lines.len() == 0 {
+                if header_lines.is_empty() {
                     let mut at = header_end;
-                    while at < request.len() - 3 {
+                    while at < request.len() - header_split.len() + 1 {
                         if request.chars().nth(at).unwrap() == '\r'
                             && request.chars().nth(at + 1).unwrap() == '\n'
                             && request.chars().nth(at + 2).unwrap() == '\r'
@@ -143,7 +143,7 @@ mod tests {
     #[test]
     fn test_is_post() {
         assert!(is_post("POST ABC"));
-        assert!(is_post("POST / HTTP/1.1\r\nUser-Agent: Autify-Webhook\r\nContent-Type: application/json\r\nX-Autify-Event: scenario\r\nAccept-Encoding: gzip;q=1.0,deflate;q=0.6,identity;q=0.3\r\nAccept: */*\r\nHost: host.docker.internal:9999\r\nContent-Length: 419"));
+        assert!(is_post("POST / HTTP/1.1\r\nContent-Type: application/json\r\nAccept-Encoding: gzip;q=1.0,deflate;q=0.6,identity;q=0.3\r\nAccept: */*\r\nHost: host.docker.internal:9999\r\nContent-Length: 419"));
     }
 
     #[tokio::test]
