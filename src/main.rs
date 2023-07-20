@@ -11,11 +11,15 @@ struct Args {
     socket_address: String,
 }
 
-fn is_post(request: &str) -> bool {
-    if request.len() < 4 {
-        return false;
+pub fn bodiless_request(line: &String) -> bool {
+    let bodiless_http_requests: Vec<&str> = vec!["CONNECT", "GET", "HEAD", "OPTIONS", "TRACE"];
+
+    for no_body in bodiless_http_requests.clone().into_iter() {
+        if line.starts_with(no_body) {
+            return true;
+        }
     }
-    return &request[0..4] == "POST";
+    false
 }
 
 #[tokio::main]
@@ -104,7 +108,7 @@ async fn serve(socket_address: &str) -> io::Result<()> {
                     continue;
                 }
 
-                if !is_post(&headers) && request.ends_with(header_split) {
+                if bodiless_request(&headers) && request.ends_with(header_split) {
                     // GET requests end with "\r\n\r\n"
                     break 'outer;
                 }
@@ -133,7 +137,7 @@ async fn serve(socket_address: &str) -> io::Result<()> {
 
 #[cfg(test)]
 mod tests {
-    use super::{is_post, serve};
+    use super::{bodiless_request, serve};
     use std::str;
     use std::time::Duration;
     use tokio::io::{AsyncReadExt, AsyncWriteExt};
@@ -141,9 +145,16 @@ mod tests {
     use tokio::time::sleep;
 
     #[test]
-    fn test_is_post() {
-        assert!(is_post("POST ABC"));
-        assert!(is_post("POST / HTTP/1.1\r\nContent-Type: application/json\r\nAccept-Encoding: gzip;q=1.0,deflate;q=0.6,identity;q=0.3\r\nAccept: */*\r\nHost: host.docker.internal:9999\r\nContent-Length: 419"));
+    fn test_bodiless_request() {
+        assert_eq!(bodiless_request(&"GET / HTTP/1.1".to_owned()), true);
+        assert_eq!(
+            bodiless_request(&"POST / HTTP/1.1\r\n\r\nBODY".to_owned()),
+            false
+        );
+        assert_eq!(
+            bodiless_request(&"PUT / HTTP/1.1\r\nContent-Type: total/funk\r\n\r\nBODY".to_owned()),
+            false
+        );
     }
 
     #[tokio::test]
