@@ -172,7 +172,7 @@ mod tests {
             Ok(proxy) => proxy,
             Err(err) => panic!("{}", err),
         };
-        let message_in = "GET TEST\r\nOther: other\r\n\r\n";
+        let message_in = "GET / HTTP/1.1\r\nOther: other\r\n\r\n";
         let wl = proxy.write(message_in.as_bytes()).await.unwrap();
         assert_ne!(wl, 0);
 
@@ -180,7 +180,7 @@ mod tests {
         let rl = proxy.read(read_buffer).await.unwrap();
         let message_out = str::from_utf8(&read_buffer[0..rl]).unwrap();
 
-        let expect = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 26\r\n\r\nGET TEST\r\nOther: other\r\n\r\n";
+        let expect = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 32\r\n\r\nGET / HTTP/1.1\r\nOther: other\r\n\r\n";
         assert_eq!(expect, message_out);
 
         // basic POST request
@@ -188,7 +188,7 @@ mod tests {
             Ok(proxy) => proxy,
             Err(err) => panic!("{}", err),
         };
-        let message_in = "POST TEST\r\nContent-Length: 4\r\n\r\nBODY";
+        let message_in = "POST / HTTP/1.1\r\nContent-Length: 4\r\n\r\nBODY";
         let wl = proxy.write(message_in.as_bytes()).await.unwrap();
         assert_ne!(wl, 0);
 
@@ -196,7 +196,7 @@ mod tests {
         let rl = proxy.read(read_buffer).await.unwrap();
         let message_out = str::from_utf8(&read_buffer[0..rl]).unwrap();
 
-        let expect = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 36\r\n\r\nPOST TEST\r\nContent-Length: 4\r\n\r\nBODY";
+        let expect = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 42\r\n\r\nPOST / HTTP/1.1\r\nContent-Length: 4\r\n\r\nBODY";
         assert_eq!(expect, message_out);
     }
 }
