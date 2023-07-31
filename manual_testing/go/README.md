@@ -7,8 +7,8 @@ cd rust-echo-server
 
 ## terminal 2
 
-install k6 then:
-
 ```
-k6 run k6_script.js
+cd rust-echo-server/manual_testing/go
+go build
+./test
 ```

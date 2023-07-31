@@ -210,6 +210,11 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "443144c8cdadd93ebf52ddb4056d257f5b52c04d3c804e657d19eb73fc33668b"
 
 [[package]]
+name = "httplus"
+version = "0.1.0"
+source = "git+https://github.com/4ydx/httplus.git#0cbc7d4fec637cb8885d30cd57cc9044a50d9988"
+
+[[package]]
 name = "is-terminal"
 version = "0.4.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -355,6 +360,7 @@ version = "0.1.0"
 dependencies = [
  "base64",
  "clap",
+ "httplus",
  "tokio",
 ]
 

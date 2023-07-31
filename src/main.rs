@@ -1,4 +1,5 @@
 use clap::Parser;
+use httplus::Request;
 use tokio::io;
 use tokio::io::AsyncReadExt;
 use tokio::io::AsyncWriteExt;
@@ -35,26 +36,13 @@ async fn main() -> io::Result<()> {
 }
 
 async fn serve(socket_address: &str) -> io::Result<()> {
-    let header_split = "\r\n\r\n";
     let external_client = TcpListener::bind(socket_address).await?;
 
     loop {
         let (mut external_client, _) = external_client.accept().await?;
 
         tokio::spawn(async move {
-            let mut headers = String::from("");
-            let mut header_end = 0;
-            let mut header_lines: Vec<&str> = vec![];
-            let mut body_length = 0;
-
-            let mut request: String = "".to_string();
-            /*
-                https://www.rfc-editor.org/rfc/rfc7230#section-3
-                HTTP-message = start-line
-                               *( header-field CRLF )
-                               CRLF
-                               [ message-body ]
-            */
+            let mut request: Request = Request::default();
             let (mut rd_external_client, mut wr_external_client) = external_client.split();
 
             'outer: loop {
@@ -70,61 +58,25 @@ async fn serve(socket_address: &str) -> io::Result<()> {
                 if n == 0 {
                     break 'outer;
                 }
+                request.update(&mut rd_external_client_buffer[0..n].to_vec());
 
-                match String::from_utf8(rd_external_client_buffer[0..n].to_vec()) {
-                    Ok(v) => request += &v,
-                    Err(e) => panic!("Invalid UTF-8 sequence: {}", e),
-                };
-
-                if header_lines.is_empty() {
-                    let mut at = header_end;
-                    while at < request.len() - header_split.len() + 1 {
-                        if request.chars().nth(at).unwrap() == '\r'
-                            && request.chars().nth(at + 1).unwrap() == '\n'
-                            && request.chars().nth(at + 2).unwrap() == '\r'
-                            && request.chars().nth(at + 3).unwrap() == '\n'
-                        {
-                            headers = request[0..at].to_owned();
-                            header_lines = headers.split("\r\n").collect();
-
-                            for header in &header_lines {
-                                if header.starts_with("Content-Length:") {
-                                    let parts: Vec<&str> = header.split(":").collect();
-                                    let num = parts.last().unwrap();
-                                    body_length = match num.trim().parse::<usize>() {
-                                        Ok(i) => i,
-                                        Err(_e) => 0,
-                                    };
-                                }
-                            }
-                        }
-                        at += 1;
-                    }
-                    header_end = at;
-                }
-
-                if header_lines.len() == 0 {
-                    // wait until headers are fully received
-                    continue;
-                }
-
-                if bodiless_request(&headers) && request.ends_with(header_split) {
-                    // GET requests end with "\r\n\r\n"
-                    break 'outer;
-                }
-                if headers.len() + header_split.len() + body_length <= request.len() {
-                    // POST body has been fully received
+                if request.body_complete() {
                     break 'outer;
                 }
             }
 
             // println!("......");
-            // println!("{}", request);
+            // println!("{:#?}", request);
+
+            let entire_request = match String::from_utf8(request.raw) {
+                Ok(v) => v,
+                Err(e) => panic!("Invalid UTF-8 sequence: {}", e),
+            };
 
             let content = format!(
                 "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {}\r\n\r\n{}",
-                request.len(),
-                request
+                entire_request.len(),
+                entire_request,
             );
             wr_external_client.write_all(content.as_bytes()).await?;
 
