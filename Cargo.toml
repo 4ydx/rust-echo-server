@@ -8,5 +8,4 @@ edition = "2021"
 [dependencies]
 tokio = { version = "1.28.2" , features = ["full"] }
 clap = { version = "4.3.2", features = ["derive"] }
-base64 = "0.21.2"
 httplus = { git = "https://github.com/4ydx/httplus.git" }
