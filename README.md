@@ -1,4 +1,5 @@
 ## Purpose
+[![Rust](https://github.com/4ydx/rust-echo-server/actions/workflows/rust.yml/badge.svg)](https://github.com/4ydx/rust-echo-server/actions/workflows/rust.yml)
 
 Just a basic echo server written in rust.
 
