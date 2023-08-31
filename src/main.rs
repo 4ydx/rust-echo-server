@@ -58,7 +58,7 @@ async fn serve(socket_address: &str) -> io::Result<()> {
                 if n == 0 {
                     break 'outer;
                 }
-                request.update(&mut rd_external_client_buffer[0..n].to_vec());
+                request.update_raw(&mut rd_external_client_buffer[0..n].to_vec());
 
                 if request.body_complete() {
                     break 'outer;
@@ -74,7 +74,7 @@ async fn serve(socket_address: &str) -> io::Result<()> {
             };
 
             let content = format!(
-                "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {}\r\n\r\n{}",
+                "HTTP/1.1 200 OK\r\nConnection: close\r\nContent-Type: text/plain\r\nContent-Length: {}\r\n\r\n{}",
                 entire_request.len(),
                 entire_request,
             );
@@ -132,7 +132,7 @@ mod tests {
         let rl = proxy.read(read_buffer).await.unwrap();
         let message_out = str::from_utf8(&read_buffer[0..rl]).unwrap();
 
-        let expect = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 32\r\n\r\nGET / HTTP/1.1\r\nOther: other\r\n\r\n";
+        let expect = "HTTP/1.1 200 OK\r\nConnection: close\r\nContent-Type: text/plain\r\nContent-Length: 32\r\n\r\nGET / HTTP/1.1\r\nOther: other\r\n\r\n";
         assert_eq!(expect, message_out);
 
         // basic POST request
@@ -148,7 +148,7 @@ mod tests {
         let rl = proxy.read(read_buffer).await.unwrap();
         let message_out = str::from_utf8(&read_buffer[0..rl]).unwrap();
 
-        let expect = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 42\r\n\r\nPOST / HTTP/1.1\r\nContent-Length: 4\r\n\r\nBODY";
+        let expect = "HTTP/1.1 200 OK\r\nConnection: close\r\nContent-Type: text/plain\r\nContent-Length: 42\r\n\r\nPOST / HTTP/1.1\r\nContent-Length: 4\r\n\r\nBODY";
         assert_eq!(expect, message_out);
     }
 }
