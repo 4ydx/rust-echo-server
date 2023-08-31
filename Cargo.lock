@@ -251,7 +251,7 @@ checksum = "443144c8cdadd93ebf52ddb4056d257f5b52c04d3c804e657d19eb73fc33668b"
 [[package]]
 name = "httplus"
 version = "0.1.0"
-source = "git+https://github.com/4ydx/httplus.git#71ca545152b02e927b5fe96b7eb49913a3b4efa7"
+source = "git+https://github.com/4ydx/httplus.git#fc5720a6c5ffb408343798e106c9c952a12b5f4a"
 dependencies = [
  "base64",
  "encoding",
@@ -275,9 +275,9 @@ dependencies = [
 
 [[package]]
 name = "memchr"
-version = "2.6.0"
+version = "2.6.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "76fc44e2588d5b436dbc3c6cf62aef290f90dab6235744a93dfe1cc18f451e2c"
+checksum = "5486aed0026218e61b8a01d5fbd5a0a134649abb71a0e53b7bc088529dced86e"
 
 [[package]]
 name = "miniz_oxide"

@@ -1,2 +1,2 @@
 cargo build
- ./target/debug/rust-server --socket-address 0.0.0.0:9999
+ ./target/debug/rust-echo-server --socket-address 0.0.0.0:9999
