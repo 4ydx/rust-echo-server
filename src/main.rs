@@ -58,7 +58,18 @@ async fn serve(socket_address: &str) -> io::Result<()> {
                 if n == 0 {
                     break 'outer;
                 }
-                request.update_raw(&mut rd_external_client_buffer[0..n].to_vec());
+                match request.update_raw(&mut rd_external_client_buffer[0..n].to_vec()) {
+                    Ok(v) => v,
+                    Err(e) => {
+                        let error = format!("{:?}", e);
+                        let content = format!(
+                            "HTTP/1.1 500 Internal Server Error\r\nConnection: close\r\nContent-Length: {}\r\nContent-Type: text/plain\r\n\r\n{}",
+                            error.len(),
+                            error
+                        );
+                        wr_external_client.write_all(content.as_bytes()).await?;
+                    }
+                };
 
                 if request.body_complete() {
                     break 'outer;
@@ -80,7 +91,13 @@ async fn serve(socket_address: &str) -> io::Result<()> {
             );
             wr_external_client.write_all(content.as_bytes()).await?;
 
-            let _ = wr_external_client.shutdown();
+            for header in request.headers.values.iter() {
+                if header.key == "Connection" && header.value == "Close" {
+                    let _ = wr_external_client.shutdown();
+                }
+            }
+
+            // let _ = wr_external_client.shutdown();
 
             Ok::<_, io::Error>(())
         });

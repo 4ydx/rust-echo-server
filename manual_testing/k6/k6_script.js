@@ -6,15 +6,18 @@ export const options = {
   duration: "30s",
 };
 
-export default function () {
+export default function() {
   // http.get("http://localhost:9999/");
 
+  let time = new Date().getTime();
   let headers = { "Content-Type": "application/json" };
-  http.post(
+  let resp = http.post(
     "http://localhost:9999/endpoint",
-    '{ "user_id": "2", "resource_type": "organization", "resource_id": "1" }',
+    '{ "time": "' +
+    time +
+    '", "resource_type": "organization", "resource_id": "1" }',
     { headers }
   );
-
+  // console.log(resp.body);
   // sleep(0.001);
 }
